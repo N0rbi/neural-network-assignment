@@ -1,0 +1,6 @@
+more_itertools
+keras
+h5py
+tensorflow
+numpy
+matplotlib
