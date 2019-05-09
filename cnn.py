@@ -36,7 +36,7 @@ train_generator = datagen.flow_from_directory(
 
 class_to_int = train_generator.class_indices
 
-steps_per_iter = len(train_generator.filenames) // 200
+steps_per_iter = len(train_generator.filenames) // 100
 
 train_generator = peekable(train_generator)
 
@@ -48,7 +48,7 @@ val_generator = datagen.flow_from_directory(
   batch_size=200
 )
 
-val_steps_per_iter = len(val_generator.filenames) // 200
+val_steps_per_iter = len(val_generator.filenames) // 100
 
 
 int_to_class = {v: k for k, v in class_to_int.items()}
@@ -65,11 +65,12 @@ print("METADATA:" + str(METADATA))
 def build_model(optimizer, convolution_units, dense_units):
   model = Sequential()
   for conv_unit in convolution_units:
-    model.add(Convolution2D(conv_unit, 3, 3, input_shape=(64, 64, 3), activation="relu"))
-  model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(Convolution2D(conv_unit, 3, 3, input_shape=(64, 64, 3), activation="relu"), kernel_regularizer=regularizers.l2(0.01))
+    model.add(MaxPooling2D(pool_size=(2,2)))
   model.add(Flatten())
   for dense_unit in dense_units:
-    model.add(Dense(dense_unit, activation= "relu"))
+    model.add(Dropout(.2))
+    model.add(Dense(dense_unit, activation= "relu"), kernel_regularizer=regularizers.l2(0.01))
   model.add(Dense(METADATA["output_shape"], activation="softmax"))
 
   model.compile(optimizer, loss="categorical_crossentropy", metrics=["accuracy"])
@@ -94,7 +95,7 @@ best_model = {"val_loss": np.inf, "model": None, "index": -1}
 for i, param_set in enumerate(expand_dict(params)):
     print(param_set)
     model_checkpoint = ModelCheckpoint("saved_models/%d_weights.{epoch:02d}.hdf5" % i, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=1)
-    early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=0, verbose=0, mode='auto', baseline=None, restore_best_weights=False)
+    early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=0, mode='auto', baseline=None, restore_best_weights=False)
 
     model = build_model(param_set["optimizer"], param_set["convolution_units"], param_set["dense_units"])
 
