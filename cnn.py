@@ -38,10 +38,23 @@ train_generator = datagen.flow_from_directory(
 
 class_to_int = train_generator.class_indices
 
-steps_per_iter = len(train_generator.filenames) // 200
+steps_per_iter = len(train_generator.filenames) // 100
 
 train_generator = peekable(train_generator)
 
+<<<<<<< HEAD
+=======
+val_generator = datagen.flow_from_directory(
+  'project/train/',  # this is the target directory
+  target_size=(64, 64),  # all images will be resized to 150x150
+  class_mode='categorical',
+  subset='validation',
+  batch_size=200
+)
+
+val_steps_per_iter = len(val_generator.filenames) // 100
+
+>>>>>>> 6966f7eefacfb66c0dc40adce9d3fcc224805492
 
 int_to_class = {v: k for k, v in class_to_int.items()}
 
