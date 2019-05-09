@@ -17,38 +17,30 @@ def expand_dict(data):
     return itertools.chain(*[[{**data, **dict(zip(grouped, i))} for i in c] for _, c in p])
 
 datagen = ImageDataGenerator(
-        rotation_range=40,
-        width_shift_range=0.2,
-        height_shift_range=0.2,
+        #rotation_range=40,
+        #width_shift_range=0.2,
+        #height_shift_range=0.2,
         rescale=1./255,
-        shear_range=0.2,
-        zoom_range=0.2,
-        horizontal_flip=True,
-        fill_mode='nearest',
-        validation_split=0.3)
+        #shear_range=0.2,
+        #zoom_range=0.2,
+        #horizontal_flip=True,
+        #fill_mode='nearest',
+        #validation_split=0.3)
+	)
 
 train_generator = datagen.flow_from_directory(
         'project/train/',  # this is the target directory
         target_size=(64, 64),  # all images will be resized to 150x150
-        batch_size=200,
+        batch_size=100000,
         class_mode='categorical',
-        subset='training')
+        #subset='training'
+	)
 
 class_to_int = train_generator.class_indices
 
 steps_per_iter = len(train_generator.filenames) // 200
 
 train_generator = peekable(train_generator)
-
-val_generator = datagen.flow_from_directory(
-  'project/train/',  # this is the target directory
-  target_size=(64, 64),  # all images will be resized to 150x150
-  class_mode='categorical',
-  subset='validation',
-  batch_size=200
-)
-
-val_steps_per_iter = len(val_generator.filenames) // 200
 
 
 int_to_class = {v: k for k, v in class_to_int.items()}
@@ -66,7 +58,7 @@ def build_model(optimizer, convolution_units, dense_units):
     model = Sequential()
     for conv_unit in convolution_units:
         model.add(Convolution2D(conv_unit, 3, 3, input_shape=(64, 64, 3), activation="relu"))
-    model.add(MaxPooling2D(pool_size=(2,2)))
+        model.add(MaxPooling2D(pool_size=(2,2)))
     model.add(Flatten())
     for dense_unit in dense_units:
         model.add(Dense(dense_unit, activation= "relu"))
@@ -82,28 +74,30 @@ from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import GridSearchCV
 classifier = KerasClassifier(build_fn= build_model)
 """
-params = {"optimizer": ["adam", "rmsprop", "adamax"],
+params = {"optimizer": ["adam"],
          "convolution_units": [[32], [64], [64], [32]],
-         "dense_units": [[128], [64, 64], [128, 64]]}
+         "dense_units": [[128], [64, 64], [128, 64], [512, 512, 64]]}
 
 #model = GridSearchCV(estimator = classifier, param_grid = params, scoring = "val_accuracy")
 
 # os.mkdir("saved_models")
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 best_model = {"val_loss": np.inf, "model": None, "index": -1}
+
+train_X, train_y = next(train_generator)
+
 for i, param_set in enumerate(expand_dict(params)):
     print(param_set)
-    model_checkpoint = ModelCheckpoint("saved_models/%d_weights.{epoch:02d}.hdf5" % i, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=1)
+    model_checkpoint = ModelCheckpoint("/saved_models/%d_weights.{epoch:02d}.hdf5" % i, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=1)
     early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=0, verbose=0, mode='auto', baseline=None, restore_best_weights=False)
 
     model = build_model(param_set["optimizer"], param_set["convolution_units"], param_set["dense_units"])
 
-    history = model.fit_generator(
-        train_generator,
-        steps_per_epoch=steps_per_iter,
-        epochs=2000,
-        validation_data=val_generator,
-        validation_steps=val_steps_per_iter,
+    history = model.fit(
+	train_X,
+	train_y,
+	validation_split=.2,        
+	epochs=2000,
         callbacks= [model_checkpoint, early_stopping])
 
     val_loss = np.min(history.history['val_loss'])
