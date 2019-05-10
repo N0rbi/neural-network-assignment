@@ -98,12 +98,12 @@ for i, param_set in enumerate(expand_dict(params)):
     history = model.fit(
 	train_X,
 	train_y,
-	validation_split=.2,        
+	validation_split=.2,
+        batch_size=200,
 	epochs=2000,
         callbacks= [model_checkpoint, early_stopping])
 
     val_loss = np.min(history.history['val_loss'])
-
     if best_model["val_loss"] > val_loss:
         best_model = {"val_loss": val_loss, "model": model, "index": i}
 
