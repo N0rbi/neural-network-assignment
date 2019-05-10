@@ -58,9 +58,11 @@ def build_model(optimizer, convolution_units, dense_units):
     for conv_unit in convolution_units:
         model.add(Convolution2D(conv_unit, 3, 3, input_shape=(64, 64, 3), activation="relu"))
         model.add(MaxPooling2D(pool_size=(2,2)))
+        model.add(Dropout(.4))
     model.add(Flatten())
     for dense_unit in dense_units:
         model.add(Dense(dense_unit, activation= "relu"))
+        model.add(Dropout(.3))
     model.add(Dense(METADATA["output_shape"], activation="softmax"))
 
     model.compile(optimizer, loss="categorical_crossentropy", metrics=["accuracy"])
