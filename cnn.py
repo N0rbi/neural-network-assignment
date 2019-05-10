@@ -42,20 +42,6 @@ steps_per_iter = len(train_generator.filenames) // 100
 
 train_generator = peekable(train_generator)
 
-<<<<<<< HEAD
-=======
-val_generator = datagen.flow_from_directory(
-  'project/train/',  # this is the target directory
-  target_size=(64, 64),  # all images will be resized to 150x150
-  class_mode='categorical',
-  subset='validation',
-  batch_size=200
-)
-
-val_steps_per_iter = len(val_generator.filenames) // 100
-
->>>>>>> 6966f7eefacfb66c0dc40adce9d3fcc224805492
-
 int_to_class = {v: k for k, v in class_to_int.items()}
 
 
@@ -102,7 +88,7 @@ train_X, train_y = next(train_generator)
 for i, param_set in enumerate(expand_dict(params)):
     print(param_set)
     model_checkpoint = ModelCheckpoint("/saved_models/%d_weights.{epoch:02d}.hdf5" % i, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=1)
-    early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=0, verbose=0, mode='auto', baseline=None, restore_best_weights=False)
+    early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=0, mode='auto', baseline=None, restore_best_weights=False)
 
     model = build_model(param_set["optimizer"], param_set["convolution_units"], param_set["dense_units"])
 
