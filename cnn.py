@@ -90,7 +90,7 @@ train_X, train_y = next(train_generator)
 
 for i, param_set in enumerate(expand_dict(params)):
     print(param_set)
-    model_checkpoint = ModelCheckpoint("/saved_models/%d_weights.{epoch:02d}.hdf5" % i, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=1)
+    model_checkpoint = ModelCheckpoint("saved_models/%d_weights.{epoch:02d}.hdf5" % i, monitor='val_loss', verbose=0, save_best_only=True, save_weights_only=False, mode='auto', period=1)
     early_stopping = EarlyStopping(monitor='val_loss', min_delta=0, patience=10, verbose=0, mode='auto', baseline=None, restore_best_weights=False)
 
     model = build_model(param_set["optimizer"], param_set["convolution_units"], param_set["dense_units"])
