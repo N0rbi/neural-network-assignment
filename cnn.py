@@ -55,8 +55,9 @@ print("METADATA:" + str(METADATA))
 
 def build_model(optimizer, convolution_units, dense_units):
     model = Sequential()
+    model.add(Convolution2D(32, 2, 2, input_shape=(64, 64, 3), activation="relu"))
     for conv_unit in convolution_units:
-        model.add(Convolution2D(conv_unit, 3, 3, input_shape=(64, 64, 3), activation="relu"))
+        model.add(Convolution2D(conv_unit, 2, 2, activation="relu"))
         model.add(MaxPooling2D(pool_size=(2,2)))
         model.add(Dropout(.4))
     model.add(Flatten())
