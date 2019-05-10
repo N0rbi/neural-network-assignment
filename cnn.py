@@ -77,8 +77,8 @@ from sklearn.model_selection import GridSearchCV
 classifier = KerasClassifier(build_fn= build_model)
 """
 params = {"optimizer": ["adam"],
-         "convolution_units": [[32, 32],[64, 64]],
-         "dense_units": [[128], [128, 128], [512, 512, 64], [512, 512, 128]]}
+         "convolution_units": [[32, 64],[64, 128]],
+         "dense_units": [[512, 256, 64], [512, 512, 128]]}
 
 #model = GridSearchCV(estimator = classifier, param_grid = params, scoring = "val_accuracy")
 
